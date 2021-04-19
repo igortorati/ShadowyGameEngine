@@ -105,8 +105,9 @@ public class EngineCore {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             onUpdate(); // Execute custom code
-            KeyListener.resetKeyRelease(); // Set key release to false
-            MouseListener.resetButtonRelease(); // Set button release to false
+            KeyListener.resetKeyRelease(); // Set key release status to false
+            MouseListener.end(); // Resetting the scrolls, setting dy and dx to zero and resetting
+            // mouse button release status.
 
             glfwSwapBuffers(gameWindow); // swap the color buffers
 
@@ -117,8 +118,5 @@ public class EngineCore {
     }
 
     public void onUpdate(){
-        if (KeyListener.isKeyDown(GLFW_KEY_SPACE)) {
-            System.out.println("Space Key Pressed");
-        }
     }
 }
