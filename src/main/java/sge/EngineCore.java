@@ -5,6 +5,7 @@ import input.MouseListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import renderer.Shader;
 import utils.Time;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -12,14 +13,20 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import test.TestScene;
 
 public class EngineCore {
     private static EngineCore engineCore = null;
     private long gameWindow;
     private GameWindowConfig windowConfig;
+    private boolean showFPS;
+    private boolean vSync;
+    private Scene activeScene;
 
     private EngineCore() {
         windowConfig = new GameWindowConfig(800, 600, 1, "Game");
+        showFPS = false; // Default value for displaying FPS on window title
+        vSync = true; // Default value for vSync
     }
 
     public static synchronized EngineCore get() {
@@ -31,10 +38,16 @@ public class EngineCore {
     }
 
     public void setScreenConfig(int width, int height, int scale, String title) {
+        setScreenConfig(width, height, scale, title, false, false);
+    }
+
+    public void setScreenConfig(int width, int height, int scale, String title, boolean showFPS, boolean vSync) {
         windowConfig.width = width;
         windowConfig.height = height;
         windowConfig.scale = scale;
         windowConfig.title = title;
+        this.showFPS = showFPS;
+        this.vSync = vSync;
     }
 
     public void run() {
@@ -80,10 +93,19 @@ public class EngineCore {
         glfwMakeContextCurrent(gameWindow);
 
         // Enable v-sync
-        glfwSwapInterval(1);
+        glfwSwapInterval((vSync)? 1 : 0);
 
         // Make window visible
         glfwShowWindow(gameWindow);
+
+        // This line is critical for LWJGL's interoperation with GLFW's
+        // OpenGL context, or any context that is managed externally.
+        // LWJGL detects the context that is current in the current thread,
+        // creates the GLCapabilities instance and makes the OpenGL
+        // bindings available for use.
+        GL.createCapabilities();
+
+
     }
 
     private void callBacks() {
@@ -95,18 +117,16 @@ public class EngineCore {
     }
 
     public void loop() {
-        // This line is critical for LWJGL's interoperation with GLFW's
-        // OpenGL context, or any context that is managed externally.
-        // LWJGL detects the context that is current in the current thread,
-        // creates the GLCapabilities instance and makes the OpenGL
-        // bindings available for use.
-        GL.createCapabilities();
+
 
         // Set the clear color
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
         float frameStart = Time.getTotalElapsedTime();
         float frameEnd = Time.getTotalElapsedTime();
+
+        this.activeScene = new TestScene();
+        activeScene.init();
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -116,6 +136,8 @@ public class EngineCore {
             onUpdate(); // Execute custom code
 
             resetListeners();
+
+            activeScene.update(Time.getDeltaTime());
 
             glfwSwapBuffers(gameWindow); // swap the color buffers
 
@@ -127,7 +149,7 @@ public class EngineCore {
             Time.setDeltaTime(frameEnd - frameStart); // Calculate delta time (time per frame)
             frameStart = frameEnd;
 
-            glfwSetWindowTitle(gameWindow, windowConfig.title + " " + (1/Time.getDeltaTime())); // Show FPS on window title
+            if (showFPS) glfwSetWindowTitle(gameWindow, windowConfig.title + " " + (1/Time.getDeltaTime())); // Show FPS on window title
         }
     }
 
