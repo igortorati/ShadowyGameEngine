@@ -8,6 +8,7 @@ package input;
 import utils.KeyAction;
 
 import java.security.Key;
+import java.util.Vector;
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
@@ -21,6 +22,11 @@ public class KeyListener {
     private KeyAction keys[];
 
     /**
+     * Stores the index of which key(s) were released: {@link #keysReleasedIndex}
+     * */
+    private Vector<Integer> keysReleasedIndex;
+
+    /**
      * Stores the singleton instance for the KeyListener
      * class: {@link #keyListener}
      * */
@@ -31,6 +37,7 @@ public class KeyListener {
      * */
     private KeyListener() {
         keys = new KeyAction[350];
+        keysReleasedIndex = new Vector<Integer>();
         for (int i = 0; i < keys.length; i++) {
             keys[i] = new KeyAction();
         }
@@ -54,15 +61,16 @@ public class KeyListener {
      */
     public static void keyCallback(long gameWindow, int key, int scancode, int action, int mods) {
         KeyListener instance = get();
-        if (key < instance.keys.length) {
-            if (action == GLFW_PRESS) {
-                instance.keys[key].held = true;
-                instance.keys[key].pressed = true;
-            } else if (action == GLFW_RELEASE) {
-                instance.keys[key].released = true; // Remember to reset this!
-                instance.keys[key].held = false;
-                instance.keys[key].pressed = false;
-            }
+        if (key >= instance.keys.length) return;
+        System.out.println("Keyboard key " + key + " " + action + ".");
+        if (action == GLFW_PRESS) {
+            instance.keys[key].held = true;
+            instance.keys[key].pressed = true;
+        } else if (action == GLFW_RELEASE) {
+            instance.keys[key].released = true; // Remember to reset this!
+            instance.keysReleasedIndex.add(key);
+            instance.keys[key].held = false;
+            instance.keys[key].pressed = false;
         }
     }
 
@@ -101,8 +109,9 @@ public class KeyListener {
      */
     public static void resetKeyRelease() {
         KeyListener instance = get();
-        for (int i = 0; i < instance.keys.length; i++) {
-            instance.keys[i].released = false;
+        for (int i = 0; i < instance.keysReleasedIndex.size(); i++) {
+            instance.keys[instance.keysReleasedIndex.get(i)].released = false;
         }
+        instance.keysReleasedIndex.clear();
     }
 }

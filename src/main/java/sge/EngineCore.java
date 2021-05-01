@@ -5,6 +5,7 @@ import input.MouseListener;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import utils.Time;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -72,11 +73,8 @@ public class EngineCore {
             throw new IllegalStateException("Failed to create the GLFW window!");
         }
 
-        // Set Callbacks (using lambda functions)
-        glfwSetCursorPosCallback(gameWindow, MouseListener::positionCallBack);
-        glfwSetMouseButtonCallback(gameWindow, MouseListener::buttonCallback);
-        glfwSetScrollCallback(gameWindow, MouseListener::scrollCallback);
-        glfwSetKeyCallback(gameWindow, KeyListener::keyCallback);
+        // Set all Call backs needed
+        callBacks();
 
         // Make OpenGL contect current
         glfwMakeContextCurrent(gameWindow);
@@ -86,6 +84,14 @@ public class EngineCore {
 
         // Make window visible
         glfwShowWindow(gameWindow);
+    }
+
+    private void callBacks() {
+        // Set Callbacks (using lambda functions)
+        glfwSetCursorPosCallback(gameWindow, MouseListener::positionCallBack);
+        glfwSetMouseButtonCallback(gameWindow, MouseListener::buttonCallback);
+        glfwSetScrollCallback(gameWindow, MouseListener::scrollCallback);
+        glfwSetKeyCallback(gameWindow, KeyListener::keyCallback);
     }
 
     public void loop() {
@@ -99,22 +105,36 @@ public class EngineCore {
         // Set the clear color
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
+        float frameStart = Time.getTotalElapsedTime();
+        float frameEnd = Time.getTotalElapsedTime();
+
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(gameWindow) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             onUpdate(); // Execute custom code
-            KeyListener.resetKeyRelease(); // Set key release status to false
-            MouseListener.end(); // Resetting the scrolls, setting dy and dx to zero and resetting
-            // mouse button release status.
+
+            resetListeners();
 
             glfwSwapBuffers(gameWindow); // swap the color buffers
 
             // Poll for window events. The key callback above will only be
             // invoked during this call.
             glfwPollEvents();
+
+            frameEnd = Time.getTotalElapsedTime();
+            Time.setDeltaTime(frameEnd - frameStart); // Calculate delta time (time per frame)
+            frameStart = frameEnd;
+
+            glfwSetWindowTitle(gameWindow, windowConfig.title + " " + (1/Time.getDeltaTime())); // Show FPS on window title
         }
+    }
+
+    private void resetListeners() {
+        KeyListener.resetKeyRelease(); // Set key release status to false
+        MouseListener.end(); // Resetting the scrolls, setting dy and dx to zero and resetting
+        // mouse button release status.
     }
 
     public void onUpdate(){

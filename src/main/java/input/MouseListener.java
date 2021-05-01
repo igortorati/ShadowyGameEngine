@@ -98,16 +98,16 @@ public class MouseListener {
      */
     public static void buttonCallback(long gameWindow, int button, int action, int mods) {
         MouseListener instance = get();
-        if (button < instance.keys.length) {
-            if (action == GLFW_PRESS) {
-                instance.keys[button].held = true;
-                instance.keys[button].pressed = true;
-            } else if (action == GLFW_RELEASE) {
-                instance.keys[button].pressed = false;
-                instance.keys[button].released = true; // Remember to reset!!
-                instance.keys[button].held = false;
-                instance.dragging = false;
-            }
+        if (button >= instance.keys.length) return;
+        System.out.println("Mouse button " + button + " " + action + ".");
+        if (action == GLFW_PRESS) {
+            instance.keys[button].held = true;
+            instance.keys[button].pressed = true;
+        } else if (action == GLFW_RELEASE) {
+            instance.keys[button].pressed = false;
+            instance.keys[button].released = true; // Remember to reset!!
+            instance.keys[button].held = false;
+            instance.dragging = false;
         }
     }
 
