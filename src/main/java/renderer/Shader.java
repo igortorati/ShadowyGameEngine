@@ -37,6 +37,7 @@ public class Shader {
 
     /**
      * Constructor for the Shader class. Loads both sources from shader .glsl file.
+     * @param path      path to the .glsl file.
      * */
     public Shader (String path) {
         this.path = path;
@@ -78,10 +79,11 @@ public class Shader {
             e.printStackTrace();
             System.err.println("Could not open file for shader '" + path + ".'");
         }
-        System.out.println(vertexShaderSource);
-        System.out.println(fragmentShaderSource);
     }
 
+    /**
+     * Compile Vertex Shader.
+     * */
     private int compileVertexShader() {
         // Creating and compiling vertex shader
         int vertexShaderID;
@@ -97,6 +99,9 @@ public class Shader {
         return vertexShaderID;
     }
 
+    /**
+     * Compile Fragment Shader.
+     * */
     private int compileFragmentShader() {
         // Creating and compiling fragment shader
         int fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -111,6 +116,9 @@ public class Shader {
         return fragmentShaderID;
     }
 
+    /**
+     * Link Vertex and Fragment Shaders.
+     * */
     private void linkShaders(int vertexShaderID, int fragmentShaderID) {
         // Linking Shaders
         this.shaderID = glCreateProgram();
@@ -125,7 +133,10 @@ public class Shader {
         }
     }
 
-    public void compile() {
+    /**
+     * Compile and Link Shader.
+     * */
+    public void create() {
         int vertexShaderID = compileVertexShader();
 
         int fragmentShaderID = compileFragmentShader();
@@ -133,10 +144,16 @@ public class Shader {
         linkShaders(vertexShaderID, fragmentShaderID);
     }
 
-    public void render () {
+    /**
+     * Set OpenGL to use this shader.
+     * */
+    public void use() {
         glUseProgram(shaderID);
     }
 
+    /**
+     * Set OpenGL to use default Shader (none).
+     * */
     public void detach() {
         glUseProgram(0);
     }

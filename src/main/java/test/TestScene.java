@@ -13,12 +13,19 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class TestScene extends Scene {
+    private float[][] colors = {
+            {1.0f, 0.0f, 0.0f},
+            {0.0f, 1.0f, 0.0f},
+            {0.0f, 0.0f, 1.0f},
+            {1.0f, 1.0f, 0.0f}
+    };
+
     private float[] vertexes = {
             //Vec3 Pos.         //RGBA Color
-            1.0f, -1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-            -1.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f,  1.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, -1.0f, 0.0f,  colors[0][0], colors[0][1], colors[0][2], 1.0f,
+            -1.0f, 1.0f, 0.0f,  colors[1][0], colors[1][1], colors[1][2], 1.0f,
+            1.0f, 1.0f, 0.0f,  colors[2][0], colors[2][1], colors[2][2], 1.0f,
+            -1.0f, -1.0f, 0.0f,  colors[3][0], colors[3][1], colors[3][2], 1.0f
     };
 
     private int[] elementArray = {
@@ -39,7 +46,7 @@ public class TestScene extends Scene {
     @Override
     public void init() {
         this.defaultShader = new Shader("assets/shaders/basicShader.glsl");
-        this.defaultShader.compile();
+        this.defaultShader.create();
 
         VAOID = glGenVertexArrays(); // Generate VAO unique ID
         glBindVertexArray(VAOID); // Mark to do things on the object with this ID
@@ -74,7 +81,7 @@ public class TestScene extends Scene {
     @Override
     public void update(float deltaTime) {
         // Bind Shader Program
-        this.defaultShader.render();
+        this.defaultShader.use();
 
         // Bind used VAO
         glBindVertexArray(VAOID);
